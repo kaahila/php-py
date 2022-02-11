@@ -75,7 +75,16 @@ class python_class{
      */
     public function add_function(array $function_defintion){
         foreach($function_defintion as $function => $defintion){
-            $this->functions[$function] = $defintion;
+            //Escape " for shell
+            $function_name = '"'.$function.'"';
+            //Same for options
+            $options = array();
+            foreach($defintion as $option_key => $option_value){
+                $option_key = '"'.$option_key.'"';
+                $option_value = '"'.$option_value.'"';
+                $options[$option_key] = $option_value;
+            }
+            $this->functions[$function_name] = $options;
         }
     }
 
@@ -89,7 +98,7 @@ class python_class{
      */
     public function remove_function(array $function_names){
         foreach($function_names as $function_name){
-            unset($this->funcctions[$function_name]);
+            unset($this->functions[$function_name]);
         }
     }
 
@@ -98,8 +107,8 @@ class python_class{
     }
 }
 
-$hallo = new python_class("Test", "modules/test_class.py");
-$hallo->add_function(array("\"function\""=>array(
-    "\"name\""=>"\"tobi\"",
+$hallo = new python_class("Test_Class", "modules/test_class.py");
+$hallo->add_function(array("test_function"=>array(
+    "test_key"=>"test_value",
 )));
 print_r($hallo->execute());
