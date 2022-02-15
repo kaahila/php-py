@@ -12,7 +12,7 @@ class python_class{
      *  @param string $class_name name of the python class
      *  @param string $module_path path of the python file that contains the class
      */
-    public function __construct($class_name, $module_path = "modules/system_class.py", $interpreter_script_path = "./py/php_interpreter.py")
+    public function __construct($class_name = "System", $module_path = "py/modules/system_class.py", $interpreter_script_path = "./py/php_interpreter.py")
     {
         //Check if needed Variables are set
         if(!empty($class_name) || !empty($module_path) || file_exists($interpreter_script_path) || $this->is_py_file($module_path)){
@@ -32,27 +32,15 @@ class python_class{
     
     /**
      * creates a new python class and trys to call all functions saved in functions array
-     * @param string $class_name optional name of the class
-     * @param string $module optional py module
-     * @param array $functions optional array of functions
      * @return array $this->return the response from the python script
      */
-    public function execute($module = "", $class_name = "", $functions = ""){
-        if($module === ""){
-           $module = $this->module_path;
-        }
-        if($class_name === ""){
-            $class_name = $this->class_name;
-         }
-         if($functions === ""){
-            $functions = $this->functions;
-         }
-        $functions_json = json_encode($functions);
-        $command = "python ".$this->interpreter_script_path." ".$class_name." " .$module." ".$functions_json." ";
+    public function execute(){
+        $functions_json = json_encode($this->functions);
+        $command = "python ".$this->interpreter_script_path." ".$this->class_name." " .$this->module." ".$functions_json." ";
         $return = array();
         exec($command, $return);
-        if($class_name != $this->class_name || $module != $this->module_path) $this->return = $return;
-        return $return;
+        $this->return = $return;
+        return $this->return;
     }
 
     /**
@@ -74,19 +62,17 @@ class python_class{
         return $ret;
     }
 
-    public function get_classes_in_module($module_path){
+    public function get_functions_in_class($class, $module_path){
         if($this->is_py_file($module_path)){
             $module = $this->convert_path_to_py_module($module_path);
-            $ret = $this->execute("modules.system_class", "System", $this->convert_function(['get_classes_in_module' => ["path"=>$module]]));
+            $this->functions = $this->add_function(['get_classes_in_module' => ["path"=>$module, "class"=>$class]]);
+            $ret = $this->execute();
             return $ret;
         } else {
             return false;
         }
     }
 
-    public function get_functions_in_class($class_name, $module){
-        
-    }
 
     /**
      * adds functions form the function defintion to function_array
@@ -145,5 +131,5 @@ $hallo->add_function(array("test_function"=>array(
     "test_key"=>"test_value",
 )));
 
-print_r($hallo->get_classes_in_module("py/modules/test_class.py"));
+print_r($hallo->get_functions_in_class("Test", "py/modules/test_class.py"));
 print_r($hallo->execute());
